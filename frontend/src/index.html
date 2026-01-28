@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GKE Helm App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+            font-size: 1.1rem;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        button:hover {
+            transform: scale(1.05);
+        }
+        
+        #result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: #f0f4ff;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        #result.show {
+            display: block;
+        }
+        
+        .status {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .info {
+            color: #666;
+            margin-top: 1rem;
+        }
+        
+        .info strong {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 GKE Helm App</h1>
+        <p>Full-stack application deployed on Google Kubernetes Engine using Helm charts and automated with GitHub Actions.</p>
+        
+        <button onclick="checkBackend()">Test Backend Connection</button>
+        <button onclick="getInfo()">Get App Info</button>
+        
+        <div id="result">
+            <div class="status" id="status"></div>
+            <div id="message"></div>
+            <div class="info" id="info"></div>
+        </div>
+    </div>
+    
+    <script>
+        const API_URL = window.location.origin;
+        
+        async function checkBackend() {
+            const resultDiv = document.getElementById('result');
+            const statusEl = document.getElementById('status');
+            const messageEl = document.getElementById('message');
+            const infoEl = document.getElementById('info');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/health`);
+                const data = await response.json();
+                
+                statusEl.textContent = '✅ Backend Connected';
+                messageEl.textContent = data.message || 'Backend is healthy';
+                infoEl.innerHTML = `
+                    <strong>Service:</strong> ${data.service || 'N/A'}<br>
+                    <strong>Version:</strong> ${data.version || 'N/A'}
+                `;
+                resultDiv.classList.add('show');
+            } catch (error) {
+                statusEl.textContent = '❌ Connection Error';
+                messageEl.textContent = `Could not connect to backend: ${error.message}`;
+                infoEl.textContent = '';
+                resultDiv.classList.add('show');
+            }
+        }
+        
+        async function getInfo() {
+            const resultDiv = document.getElementById('result');
+            const statusEl = document.getElementById('status');
+            const messageEl = document.getElementById('message');
+            const infoEl = document.getElementById('info');
+            
+            try {
+                const response = await fetch(`${API_URL}/api/info`);
+                const data = await response.json();
+                
+                statusEl.textContent = '📊 Application Info';
+                messageEl.textContent = data.message || '';
+                infoEl.innerHTML = `
+                    <strong>Platform:</strong> ${data.platform || 'N/A'}<br>
+                    <strong>Environment:</strong> ${data.environment || 'N/A'}<br>
+                    <strong>Deployment:</strong> ${data.deployment || 'N/A'}
+                `;
+                resultDiv.classList.add('show');
+            } catch (error) {
+                statusEl.textContent = '❌ Error';
+                messageEl.textContent = `Could not get info: ${error.message}`;
+                infoEl.textContent = '';
+                resultDiv.classList.add('show');
+            }
+        }
+    </script>
+</body>
+</html>
