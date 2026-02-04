@@ -1,7 +1,7 @@
 replicaCount: 2
 
 image:
-  repository: us-central1-docker.pkg.dev/PROJECT_ID/app-images/frontend
+  repository: us-central1-docker.pkg.dev/gke-test-485910/app-images/frontend
   pullPolicy: Always
   tag: "latest"
 
