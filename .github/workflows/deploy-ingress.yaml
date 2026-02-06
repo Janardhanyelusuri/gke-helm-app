@@ -36,21 +36,27 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v2
     
+    # ADD THIS STEP
+    - name: Install GKE Auth Plugin
+      run: |
+        echo "Installing gke-gcloud-auth-plugin..."
+        gcloud components install gke-gcloud-auth-plugin --quiet
+    
     - name: Get GKE credentials
       run: |
-        gcloud container clusters get-credentials ${{ env.GKE_CLUSTER }} \
-          --zone ${{ env.GKE_ZONE }} \
-          --project ${{ env.PROJECT_ID }}
+        gcloud container clusters get-credentials ${GKE_CLUSTER} \
+          --zone ${GKE_ZONE} \
+          --project ${PROJECT_ID}
     
     - name: Create static IP (if not exists)
       run: |
-        if ! gcloud compute addresses describe app-static-ip --global --project=${{ env.PROJECT_ID }} 2>/dev/null; then
-          gcloud compute addresses create app-static-ip --global --project=${{ env.PROJECT_ID }}
+        if ! gcloud compute addresses describe app-static-ip --global --project=${PROJECT_ID} 2>/dev/null; then
+          gcloud compute addresses create app-static-ip --global --project=${PROJECT_ID}
         fi
     
     - name: Get static IP
       run: |
-        IP=$(gcloud compute addresses describe app-static-ip --global --project=${{ env.PROJECT_ID }} --format="value(address)")
+        IP=$(gcloud compute addresses describe app-static-ip --global --project=${PROJECT_ID} --format="value(address)")
         echo "Static IP: $IP"
     
     - name: Apply Ingress
@@ -61,7 +67,11 @@ jobs:
       run: |
         kubectl wait --for=condition=Available --timeout=300s ingress/app-ingress || true
     
-    - name: Deployment Summary
+    - name: Get Ingress Details
       run: |
-        echo "✅ Ingress deployed successfully!"
+        echo "Ingress created successfully!"
         kubectl get ingress app-ingress
+        echo ""
+        echo "Access your app at:"
+        IP=$(gcloud compute addresses describe app-static-ip --global --project=${PROJECT_ID} --format="value(address)")
+        echo "http://$IP"
